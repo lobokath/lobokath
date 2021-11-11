@@ -1,49 +1,19 @@
-pragma solidity ^0.6.6;
-
-
-import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
-import "@chainlink/contracts/src/v0.6/vendor/SafeMathChainlink.sol";
+ppragma solidity ^0.4.17;
 
 contract Question2 {
-    
-    // As I based myself on an example of a contract that uses a previous version of 0.8, I had to use this extension to do an accurate calculation among different numbers.
-    using SafeMathChainlink for uint256;
-    
-    
-    mapping(address => uint256) public addressToAmountDeployed;
-    address[] public funders;
-    address public owner;
-    AggregatorV3Interface public priceFeed;
-    
-    // adressing that the contract can be called externally or via a message
-    constructor(address _priceFeed) public {
-        priceFeed = AggregatorV3Interface(_priceFeed);
+    // Doing a function to allow people to transfer funds to the contract.
+     function deposit(uint256 amount) payable public {
+        require(msg.value == amount);
+        
     }
     
-    //Stablishing
-    
-      function transfer() public payable {
-        uint256 mimimumETH = 1;
-        require((msg.value) >= mimimumETH,
-            "You need to spend more ETH!"
-        );
-        addressToAmountDeployed[msg.sender] += msg.value;
-        funders.push(msg.sender);
+  //Doing another function on which any person can retrieve a maximum amount of 2 ETH 
+    function withdraw() public payable {
+        uint256 MAX_VALUE=2;
+        require((msg.value)<MAX_VALUE);
+        msg.sender.transfer(address(this).balance);
     }
 
-
-    function getBalance() public view returns(uint) {
-        return address(this).balance;
-    }
-
-    function withdrawMoney() public {
-        address payable to = payable(msg.sender);
-        to.transfer(getBalance());
-    }
-
-    function withdrawMoneyTo(address payable _to) public {
-        _to.transfer(getBalance());
-    }
 }
-  
-  //creation of Question2 errored: Error encoding arguments: Error: invalid address (argument="address" value="" code=INVALID_ARGUMENT version=address/5.4.0) (argument=null value="" code=INVALID_ARGUMENT version=abi/5.4.1)
+
+\\Hash:0x014819eb03851e431af69cca0b9928637c91560a030eaeee67ec34b126d8eaf0
