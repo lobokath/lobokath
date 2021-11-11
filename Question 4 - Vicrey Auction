@@ -88,3 +88,5 @@ contract VicreyAuction {
         msg.sender.transfer(amount);
     }
 }
+
+// Hash: 0x21d3d91c59c40e878c6c27a02c85feb4476eab1129deb2c6721059122539469b
