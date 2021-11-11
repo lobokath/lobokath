@@ -1,0 +1,52 @@
+pragma solidity ^0.8;
+
+contract Question2 {
+    // Defining ownership
+    
+    address public owner;
+   
+    modifier Onlyonwner() {
+        require(msg.sender == owner);
+        _;    }
+    
+    
+     function deposit(uint256 amount) payable public {
+        require(msg.value == amount);
+        
+    }
+
+
+
+//Doing an array of lenght 4 to limit only the adresses presented on it and limiting the function to be modified only by me, the ownner 
+
+mapping (address => uint256) public mappedUsers;
+address[] public addressIndices;
+
+    function create (uint256 _pseudo) public Onlyonwner {
+        mappedUsers = [addressIndices.push()];
+        uint256 arrayLength = addressIndices.length;
+        uint256 indexToBeDeleted; {
+        for (uint i=0; i<arrayLength; i)
+             { indexToBeDeleted = (i>3);
+             break;
+             
+        }}
+        
+        
+    }
+
+    function withdraw() public payable {
+        uint256 MAX_VALUE=2;
+        require((msg.value)<MAX_VALUE);
+        msg.sender.transfer(address(this).balance);
+    }
+
+}
+
+
+
+
+//Errors: line 27 - types in storage containing (nested) mapping cannot be cannot be assignet to.
+                  - memory is not implicitly convertible to expected type mapping.
+         line 31 - Type bool is not implicitly convertible to expected tupe uint256.
+
