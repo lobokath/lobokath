@@ -1,0 +1,90 @@
+pragma solidity ^0.4.21;
+
+import "./IERC20Basic.sol";
+
+//Creating the contract, stablising the functions and defining the good that will be sold, the minimum acceptable bid (reservePrice), the time on which the contract will be accepting bids
+
+contract VicreyAuction {
+    address seller;
+
+    IERC20Token public token;
+    uint256 public reservePrice;
+    uint256 public endOfBidding;
+    uint256 public endOfRevealing;
+    address public highBidder=seller;
+    uint256 public highBid=reservePrice;
+    uint256 public secondBid = reservePrice;
+
+
+    function Auction(
+        IERC20Token _token,
+        uint256 _reservePrice,
+        uint256 biddingPeriod,
+        uint256 revealingPeriod)
+        public
+    {
+        token = _token;
+        reservePrice = _reservePrice;
+        endOfBidding = now + biddingPeriod;
+        endOfRevealing = endOfBidding + revealingPeriod;
+        seller = msg.sender;
+
+    }
+    
+    //Now doing a payable function to allow bidders to bid until the end of the auction. As the only thing required here is to bid whithin the auction and //
+    // the balance of the bidder be higher than the reserve price, this allows one bidder to do multiple bids, as there is no restriction to it.//
+    
+    mapping(address => uint256) public balanceOf;
+    mapping(address => bytes32) public hashedBidOf;
+
+    function bid(bytes32 hash) public payable {
+        require(now < endOfBidding);
+        hashedBidOf[msg.sender] = hash;
+        balanceOf[msg.sender] += msg.value;
+        require(balanceOf[msg.sender] >= reservePrice);
+}
+
+    //Defining the transaction that will happen by the end of the bid.
+    
+    function transfer(address from, address to, uint256 amount) private {
+        balanceOf[to] += amount;
+        balanceOf[from] -= amount;
+    }
+
+    //Now defining a function to reveal which was the highest bid.//
+    //We can only decrypt the value of the bid via the Nonce of the Hash originated on the bidding proccess.//
+   function reveal(uint256 amount, uint256 nonce) public {
+        require(now >= endOfBidding && now < endOfRevealing);
+        require(keccak256(amount, nonce) == hashedBidOf[msg.sender]);
+
+
+//Conditioning the amount that will be transfered for the seller to the highest bid possible, subjected to the balance of the bidder and the bid be higher than the amount//
+//After finding the highest bid, we will find the second highest, which will be the paid by the higest bidder and received by the seller
+
+        if (amount > balanceOf[msg.sender]) {
+            return;
+        }
+
+        if (amount >= highBid) {
+            transfer(seller, highBidder, secondBid);
+            secondBid = highBid;
+            highBid = amount;
+            highBidder = msg.sender;
+            transfer(highBidder, seller, secondBid);
+        } else if (amount > secondBid) {
+            transfer(seller, highBidder, secondBid);
+            secondBid = amount;
+            transfer(highBidder, seller, secondBid);
+       }
+    }
+
+//Limiting the withdraw after the end of the reveal, we do a withdraw function to the msg.sender, the seller of the Tokebn
+
+    function withdraw() public {
+        require(now >= endOfRevealing);
+
+        uint256 amount = balanceOf[msg.sender];
+        balanceOf[msg.sender] = 0;
+        msg.sender.transfer(amount);
+    }
+}
